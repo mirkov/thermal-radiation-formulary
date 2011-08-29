@@ -1,0 +1,6 @@
+Thermal radiation formulary
+
+A collection of formulas for thermal radiation problems
+
+
+
