@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-07 14:18:32EDT view-factors.lisp>
+;; Time-stamp: <2011-09-07 17:44:21EDT view-factors.lisp>
 ;;
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -115,88 +115,7 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-52.html"
 	    (- (f r2^2 r4^2 h^2)
 	       (f 1d0 r4^2 h^2)))))))
 
-(defun f1-2-base-of-right-cylinder-to-inside-surface
-    (|r| |h|)
-  "View factor of the base of cylinder of radius `r' to its inside
-  surface of height `h'
 
-From the configuration factor library, C-79
-
-http://www.engr.uky.edu/rtl/Catalog/sectionc/C-79.html"
-  (let ((H (/ |h| (* 2d0 |r|))))
-    (* 2d0 H (- (sqrt (+ 1d0 (^2 H))) H))))
-
-(lisp-unit:define-test f1-2-base-of-right-cylinder-to-inside-surface
-  (lisp-unit:assert-number-equal (* 2d0 1d0 (- (sqrt 2d0) 1d0))
-		       (f1-2-base-of-right-cylinder-to-inside-surface 1d0 2d0)))
-
-(defun f1-2-inner-surface-of-upper-cylinder-to-base-ring
-    (|r1| |r2| |c1| |c2| |a|)
-  "View factor of right cylinder of radius `a' to a coaxial ring of
-  radii `r1' and `r2'.  The cylinder base is `c1' from the ring plane and top is `c2' from the ring plane.
-
-From configuration factor library, C-85
-
-http://www.engr.uky.edu/rtl/Catalog/sectionc/C-85.html"
-  (assert (< |r1| |r2|))
-  (assert (<= |r2| |a|))
-  (assert (< |c1| |c2|))
-  (let ((C1 (/ |c1| |a|))	
-	(C2 (/ |c2| |a|))
-	(R1 (/ |r1| |a|))	
-	(R2 (/ |r2| |a|)))
-    (let ((C1^2 (^2 C1))
-	  (C2^2 (^2 C2))
-	  (C1^4 (^4 C1))
-	  (C2^4 (^4 C2))
-	  (1+R1^2 (+ 1d0 (^2 R1)))
-	  (1-R1^2 (- 1d0 (^2 R1)))
-	  (1+R2^2 (+ 1d0 (^2 R2)))
-	  (1-R2^2 (- 1d0 (^2 R2))))
-      (* (/ -1d0
-	    (* 4d0 (- C2 C1)))
-	 (+ (- (sqrt (+ C1^4 (* 2 C1^2 1+R2^2) (^2 1-R2^2)))
-	       (sqrt (+ C1^4 (* 2 C1^2 1+R1^2) (^2 1-R1^2))))
-	    (- (sqrt (+ C2^4 (* 2 C2^2 1+R1^2) (^2 1-R1^2)))
-	       (sqrt (+ C2^4 (* 2 C2^2 1+R2^2) (^2 1-R2^2)))))))))
-      
-(lisp-unit:define-test f1-2-inner-surface-of-upper-cylinder-to-base-ring
-  ;; Configuration 79 is a special case of configuration 85 with the
-  ;; ring expanding into the base of the cylinder and the cylinder
-  ;; touching the base
-  (let ((r 1d0)
-	(h 1d0))
-    (let ((A1 (* pi (^2 r)))
-	  (A2 (* 2d0 pi r h)))
-      (lisp-unit:assert-number-equal
-       (* A1 (f1-2-base-of-right-cylinder-to-inside-surface 1d0 1d0))
-       (* A2 (f1-2-inner-surface-of-upper-cylinder-to-base-ring 0d0 1d0 0d0 1d0 1d0))
-       "C-85 tested against C79")))
-  ;; Split cylinder into two of equal areas.  Test that f12 of the
-  ;; whole cylinder is twice f12 o th e individual areas
-  (let ((a 1d0)
-	(r2 1d0)
-	(r1 0d0)
-	(c1 1d0)
-	(c2 2d0))
-    (lisp-unit:assert-number-equal
-     (* 2 (f1-2-inner-surface-of-upper-cylinder-to-base-ring r1 r2 0d0 c2 a))
-     (+ (f1-2-inner-surface-of-upper-cylinder-to-base-ring r1 r2 0d0 c1 a)
-	(f1-2-inner-surface-of-upper-cylinder-to-base-ring r1 r2 c1 c2 a))
-     "C-85 split cylinder test"))
-  ;; Split base into two of equal areas.  The sum of viewfactors from
-  ;; side to the two areas should equal the the viewfactor of the side
-  ;; to the total area
-  (let ((a 1d0)
-	(r2 1d0)
-	(r1 (/ (sqrt 2d0)))
-	(c1 0d0)
-	(c2 1d0))
-    (assert-number-equal
-     (f1-2-inner-surface-of-upper-cylinder-to-base-ring 0d0 r2 c1 c2 a)
-     (+ (f1-2-inner-surface-of-upper-cylinder-to-base-ring 0d0 r1 c1 c2 a)
-	(f1-2-inner-surface-of-upper-cylinder-to-base-ring r1 r2 c1 c2 a))
-     "C-85 split bottom ring test")))
 
 
 ;;; view factors between rectangular elements
