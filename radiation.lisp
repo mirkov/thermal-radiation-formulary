@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-08-25 17:26:43EDT radiation.lisp>
+;; Time-stamp: <2011-09-07 14:18:05EDT radiation.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -52,7 +52,7 @@ Siegel&Howell (1-22)"
   "Hemispherical total emissive power for a blackbody at temperature temp
 
 Siegel&Howell (1-28)"
-  (* +sigma+ (expt temp 4)))
+  (* +sigma+ (^4 temp)))
 
 (defun frac-emiss-pwr (lambdaT)
   "Fractional blackbody emissive power in the range 0 to lambda.T
@@ -88,24 +88,29 @@ Siegel&Howell (1-33) for lambda.T<1e4, my expansion otherwise"
 
 ;; Example 1-1
 (define-test spectral-dist-1
-  (assert-equality #'epsilon-equals (* 1 2746)
-		   (spectral-dist 6 1273) "elb"))
+  (let ((*epsilon* 1e-4))
+  (assert-number-equal  (* 1 2746)
+		   (spectral-dist 6 1273) "elb")))
 ;; Example 1-2
 (define-test spectral-dist-2
-  (assert-equality #'epsilon-equals 2.5898754e7
-		   (spectral-dist 0.55 5780) "elb"))
+  (let ((*epsilon* 1e-5))
+  (assert-number-equal  2.5898754e7
+		   (spectral-dist 0.55 5780) "elb")))
 
 ;; Example 1-3
 (define-test peak-wavelength
-  (assert-equality #'epsilon-equals 9.85
-		   (peak-wavelength (+ 273 21))))
+  (let ((*epsilon* 1e-3))
+  (assert-number-equal  9.85
+		   (peak-wavelength (+ 273 21)))))
 
 ;; Example 1-8
 (define-test frac-emiss-pwr-low-lt-range
-  (assert-equality #'epsilon-equals 0.14026 (frac-emiss-pwr 2400))
-  (assert-equality #'epsilon-equals 8.703e-5 (frac-emiss-pwr 900)))
+  (let ((*epsilon* 1e-3))
+  (assert-number-equal  0.14026 (frac-emiss-pwr 2400))
+  (assert-number-equal  8.703e-5 (frac-emiss-pwr 900))))
 
 
 (define-test frac-emiss-pwr-high-lt-range
-  (assert-equality #'epsilon-equals 0.96893 (frac-emiss-pwr 15000))
-  (assert-equality #'epsilon-equals 0.97581 (frac-emiss-pwr 16500)))
+  (let ((*epsilon* 1e-4))
+    (assert-number-equal  0.96893 (frac-emiss-pwr 15000))
+    (assert-number-equal  0.97581 (frac-emiss-pwr 16500))))

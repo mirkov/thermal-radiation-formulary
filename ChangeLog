@@ -1,0 +1,17 @@
+2011-09-07  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+
+	* thermal-radiation-formulary-unit-tests.lisp
+	(parallel-plate-equilibrium-sigma#1)
+	(parallel-plate-equilibrium-sigma=1): Replaced `(assert-equals
+	#'epsilon-equal ...)'  with `(let ((*epsilon*
+	...)) (assert-number-equal ...))' and adjusted *epsilon*
+
+	* radiation.lisp: Replaced `(assert-equals #'epsilon-equal ...)'
+	with `(let ((*epsilon* ...)) (assert-number-equal ...))' and
+	adjusted *epsilon*
+
+2011-08-29  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+
+	* view-factors.lisp (F1-2-perpendicular-rectangles-with-common-edge):
+	Improved documentation.
+

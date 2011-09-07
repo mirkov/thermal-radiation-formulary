@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-08-25 15:23:29EDT rest.lisp>
+;; Time-stamp: <2011-09-07 14:06:12EDT rest.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 (in-package :thermal-radiation-formulary)
 
 
-;;;;  Black-body formulae
+
 
 (export '(beta))	      
 
@@ -46,7 +46,7 @@
 
 ;;; three infinite plate problems
 ;; checked against SWP calculation
-
+#|
 (defmacro 3parallel-plate-solver ((mat-def rhs-def) &body post-process)
   "Set-up environment for solving three parallel plate radiation
 problem.  The first two arguments, `mat-def' and `rhs-def' accept gsll
@@ -131,3 +131,4 @@ Need macro send from my-utils.  Otherwise use (funcall closure args)"
 	     
 
 
+|#

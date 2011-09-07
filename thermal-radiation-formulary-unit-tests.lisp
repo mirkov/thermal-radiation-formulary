@@ -15,7 +15,7 @@
 	(T1 400)
 	Tp)
     (setf Tp (parallel-plate-equilibrium T0 T1))
-    (assert-equality #'epsilon-equals (- (st4 T1) (st4 Tp))
+    (assert-number-equal (- (st4 T1) (st4 Tp))
 		     (- (st4 Tp) (st4 T0)))))
 
 ;; same as above, but for a problem emissivities that are not unity
@@ -25,7 +25,7 @@
 	 (beta0 0.5)
 	 (beta1 0.2)
 	 (Tp (parallel-plate-equilibrium T0 T1 beta0 beta1)))
-    (assert-equality #'epsilon-equals (* beta1 (- (st4 T1) (st4 Tp)))
+    (assert-number-equal (* beta1 (- (st4 T1) (st4 Tp)))
 		     (* beta0 (- (st4 Tp) (st4 T0))))))
 		   
 
