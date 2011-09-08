@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-07 17:31:10EDT inner-cylinder-surfaces-view-factors.lisp>
+;; Time-stamp: <2011-09-08 18:02:50EDT inner-cylinder-surfaces-view-factors.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -18,6 +18,38 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (in-package :radiation)
+
+;; view factors between inner surfaces of a cylinder:
+;; - bases
+;; - rings on bases (coaxial to cylinder axis)
+;; - disks on bases (coaxial to cylinder axis)
+;; - rings on sides (coaxial to cylinder axis)
+;;
+;;
+
+
+;; All routines are initially lightly tested for a very special and
+;; simple set of parameters.  The latter part of the file contains a
+;; suit of more comprehensive tests.  These use symmetry and
+;; configuration algebra to test the formulas against each other.
+
+(defun f1-2-inside-cylinder-surface-to-itself (|r| |h|)
+  "View factor of the inside surface of cylinder of radius `r' 
+  and height `h' to itself
+
+From the configuration factor library, C-78
+
+http://www.engr.uky.edu/rtl/Catalog/sectionc/C-78.html"
+  (let ((H (/ |h| (* 2d0 |r|))))
+    (- (+ 1d0 H)
+       (sqrt (+ 1d0 (^2 H))))))
+
+(define-test f1-2-inside-cylinder-surface-to-itself
+  (let ((r 1d0)
+	(h 2d0))
+    (assert-number-equal
+     (- 2d0 (sqrt 2d0))
+     (f1-2-inside-cylinder-surface-to-itself r h))))
 
 (defun f1-2-base-of-right-cylinder-to-inside-surface
     (|r| |h|)
@@ -91,18 +123,32 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-81.html"
 From configuration factor library, C-82
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-82.html"
-  (assert (< |r1| |r2|))
-  (assert (< |h1| |h2|))
+  (assert (<= |r1| |r2|))
+  (assert (<= |h1| |h2|))
   (let ((R (/ |r1| |r2|))
 	(H1 (/ |h1| |r2|))
 	(H2 (/ |h2| |r2|)))
     (let* ((R^2 (^2 R))
-	   (X1 (+ (^2 H1) R^2 1d0))
-	   (X2 (+ (^2 H2) R^2 1d0)))
+	   (X1 (+^2 H1 R 1d0))
+	   (X2 (+^2 H2 R 1d0)))
       (* (/ (* 4d0 R (- H2 H1)))
 	 (+ (- X1 X2)
 	    (- (sqrt (- (^2 X1) (* 4d0 R^2))))
 	    (sqrt (- (^2 X2) (* 4d0 R^2))))))))
+
+(define-test f1-2-interior-cylinder-surface-to-perpendicular-coaxial-disk
+  (let ((r1 1d0)
+	(r2 1d0)
+	(h1 1d0)
+	(h2 2d0))
+    (assert-number-equal
+     (* 0.25d0 (+ (- 3d0 6d0)
+		  (- (sqrt (- 9d0 4d0)))
+		  (sqrt (- 36d0 4d0))))
+     (f1-2-interior-cylinder-surface-to-perpendicular-coaxial-disk
+      r1 r2 h1 h2))))
+
+
 
 (defun f1-2-annular-ring-to-interior-cylinder-surface
     (|r1| |r2| |h|)
@@ -112,16 +158,27 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-82.html"
 From configuration factor library, C-83
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-82.html"
   (assert (< |r1| |r2|))
-  (let ((R (/ |r1| |r2|))
-	(H (/ |h| |r2|)))
+  (let ((R (/ |r2| |r1|))
+	(H (/ |h| |r1|)))
     (let ((R^2 (^2 R))
 	  (H^2 (^2 H)))
       (* 0.5d0
 	 (+ 1d0
 	    (/ (- (* H (sqrt (+ (* 4d0 R^2) H^2)))
-		   (sqrt (- (^2 (+ 1d0 R^2 H^2))
-			    (* 4d0 R^2))))
-		(- R^2 1d0)))))))
+		  (sqrt (- (^2 (+^2 1d0 R H))
+			   (* 4d0 R^2))))
+	       (- R^2 1d0)))))))
+
+(define-test f1-2-annular-ring-to-interior-cylinder-surface
+  (let ((r1 1d0)
+	(r2 2d0)
+	(h 1d0))
+    (assert-number-equal
+     (* 0.5d0
+	(+ 1d0 (* (/ 3d0)
+		  (- (* 1d0 (sqrt 17d0))
+		     (sqrt 20d0)))))
+     (f1-2-annular-ring-to-interior-cylinder-surface r1 r2 h))))
 
 (defun f1-2-interior-cylinder-surface-to-annular-ring-in-base
     (|r1| |r2| |a| |l|)
@@ -148,6 +205,22 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-82.html"
 	(* (/ (* 4d0 L))
 	   (- (+ X2 R2^2)
 	      (+ X1 R1^2)))))))
+
+(define-test f1-2-interior-cylinder-surface-to-annular-ring-in-base
+  (let ((|r1| 1/4)
+	(|r2| 1/2)
+	(|a| 1)
+	(|l| 1))
+    (let ((*epsilon* 1e-7))
+      (assert-number-equal
+       (let ((R1 |r1|)
+	     (R2 |r2|)
+	     (L |l|))
+	 (let ((X1 (sqrt (+ 1 (* 2 (+ 1 1/16)) (^2 (- 1 1/16)))))
+	       (X2 (sqrt (+ 1 (* 2 (+ 1 1/4)) (^2 (- 1 1/4))))))
+	   (* 1/4 (+ X2 (- X1) (^2 R2) (- (^2 R1))))))
+       (f1-2-interior-cylinder-surface-to-annular-ring-in-base
+	|r1| |r2| |a| |l|)))))
 
 (defun f1-2-inner-surface-of-upper-cylinder-to-base-ring
     (|r1| |r2| |c1| |c2| |a|)
@@ -180,7 +253,7 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-85.html"
 	    (- (sqrt (+ C2^4 (* 2 C2^2 1+R1^2) (^2 1-R1^2)))
 	       (sqrt (+ C2^4 (* 2 C2^2 1+R2^2) (^2 1-R2^2)))))))))
       
-(lisp-unit:define-test f1-2-inner-surface-of-upper-cylinder-to-base-ring
+(define-test f1-2-inner-surface-of-upper-cylinder-to-base-ring
   ;; Configuration 79 is a special case of configuration 85 with the
   ;; ring expanding into the base of the cylinder and the cylinder
   ;; touching the base
@@ -188,7 +261,7 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-85.html"
 	(h 1d0))
     (let ((A1 (* pi (^2 r)))
 	  (A2 (* 2d0 pi r h)))
-      (lisp-unit:assert-number-equal
+      (assert-number-equal
        (* A1 (f1-2-base-of-right-cylinder-to-inside-surface 1d0 1d0))
        (* A2 (f1-2-inner-surface-of-upper-cylinder-to-base-ring 0d0 1d0 0d0 1d0 1d0))
        "C-85 tested against C79")))
@@ -239,6 +312,18 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-86.html"
 	     (- (*(+ 1d0 H2/H1)
 		  (sqrt (+ 4d0 (^2 (+ H1 H2))))))))))))
 
+(define-test f1-2-cylinder-inside-surface-to-adjecant-inside-surface
+  (let ((r 1)
+	(h1 1)
+	(h2 1))
+    (let ((*epsilon* 1e-6))
+      (assert-number-equal
+       (+ 1/2 (* 1/4 (+ (sqrt 5)
+			(* 1 (sqrt 5))
+			(- (* 2 (sqrt 8))))))
+       (f1-2-cylinder-inside-surface-to-adjecant-inside-surface
+	r h1 h2)))))
+
 (defun f1-2-cylinder-inside-surface-to-other-inside-surface
     (|l1| |l2| |l3| |a|)
   "View factor from a in inside surface of height `l3'-`l2' of
@@ -260,3 +345,21 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-87.html"
 	    (- (X (- L2 L1)))
 	    (- (X L3))
 	    (X L2))))))
+
+(define-test f1-2-cylinder-inside-surface-to-other-inside-surface
+  (let ((l1 1)
+	(l2 2)
+	(l3 3)
+	(a 1)
+	(*epsilon* 1e-5))
+    (assert-number-equal
+     (let ((X1 (sqrt 5))
+	   (X2 (sqrt 8))
+	   (X3 (sqrt 13)))
+       (* (/ 4)
+	  (+ 2
+	     (* 2 (sqrt 8))
+	     (- (* 1 (sqrt 5)))
+	     (- (* 3 X3))
+	     (* 2 X2))))
+     (f1-2-cylinder-inside-surface-to-other-inside-surface l1 l2 l3 a))))

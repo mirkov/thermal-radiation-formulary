@@ -1,4 +1,9 @@
+2011-09-08  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+
 2011-09-07  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+
+	* inner-cylinder-surfaces-view-factors.lisp: New file for view
+	factors between inner surfaces of a cylinder
 
 	* view-factors.lisp: Removed view factors between inner surfaces
 	of a cylinder (C79-85) into separate file
