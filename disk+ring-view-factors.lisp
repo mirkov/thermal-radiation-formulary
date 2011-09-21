@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-21 14:47:52EDT disk+ring-view-factors.lisp>
+;; Time-stamp: <2011-09-21 15:36:33EDT disk+ring-view-factors.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -92,7 +92,7 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-47.html"
       (f1-2-parallel-coaxial-disk->ring 1.5d0 3d0 1.75d0 2d0))))
 
 
-(defun f1-2-parallel-coaxial-rings (|r1| |r2| |a|
+#|(defun f1-2-parallel-coaxial-rings (|r1| |r2| |a|
 					      |r3| |r4|)
   "View factor from ring of radii `r-inner' and `r-outer' to parallel
   coaxial disk of radius `r-disk'.  The separation between the two is
@@ -116,20 +116,51 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-52.html"
 		(f 1d0 r3^2 h^2))
 	     (- (f r2^2 r4^2 h^2)
 		(f 1d0 r4^2 h^2))))
+       A1 A2))))|#
+
+(defun f1-2-parallel-coaxial-rings (|r1| |r2| |a|
+					      |r3| |r4|)
+  "View factor from ring of radii `r1'-`r2' to coaxial parallel ring
+  of radii `r3'-`r4'.  The separation between the two is `|a|'
+
+http://www.engr.uky.edu/rtl/Catalog/sectionc/C-52.html
+
+I have re-written the formula from the catalogue and normalized to the
+outer radius r2 instead of the inner radius r1.  This normalization
+allows for disks by setting r1=0.
+
+The original formula with normalizations with respect to r1 is
+implemented in the commented out code above.
+"
+  (assert (<= |r1| |r2|))
+  (assert (<= |r3| |r4|))
+  (labels ((f (ra^2 rb^2 h^2)
+	     (sqrt (- (^2 (+ ra^2 rb^2 h^2))
+		      (* 4d0 ra^2 rb^2)))))
+    (let ((r1^2 (^2 (/ |r1| |r2|)))
+	  (r3^2 (^2 (/ |r3| |r2|)))
+	  (r4^2 (^2 (/ |r4| |r2|)))
+	  (h^2 (^2 (/ |a| |r2|)))
+	  (A1 (* pi (-^2 |r2| |r1|)))
+	  (A2 (* pi (-^2 |r4| |r3|))))
+      (values
+       (* (/ (* 2d0 (- 1d0 r1^2)))
+	  (- (- (f 1d0 r3^2 h^2)
+		(f r1^2 r3^2 h^2))
+	     (- (f 1d0 r4^2 h^2)
+		(f r1^2 r4^2 h^2))))
        A1 A2))))
 
 (define-test f1-2-parallel-coaxial-rings
-  ;; I test against disk-disk and disk-ring form factors
-  (let ((lisp-unit:*epsilon* 1e-9))
-    (assert-f12-equal
-     (f1-2-parallel-coaxial-equal-disks 1d0 1.5d0)
-     (f1-2-parallel-coaxial-rings 1d-9 1d0 1.5d0 0d0 1.d0))
-    (assert-f12-equal
-     (f1-2-parallel-coaxial-unequal-disks 1.0 2d0 1.5d0)
-     (f1-2-parallel-coaxial-rings 1d-9 1.0 2d0 0d0 1.5d0))
-    (assert-f12-equal
-     (f1-2-parallel-coaxial-disk->ring 1d0 2d0 3d0 4d0)
-     (f1-2-parallel-coaxial-rings 1d-9 1d0 2d0 3d0 4d0))))
+  (assert-f12-equal
+   (f1-2-parallel-coaxial-equal-disks 1d0 1.5d0)
+   (f1-2-parallel-coaxial-rings 0d0 1d0 1.5d0 0d0 1.d0))
+  (assert-f12-equal
+   (f1-2-parallel-coaxial-unequal-disks 1.0 2d0 1.5d0)
+   (f1-2-parallel-coaxial-rings 0d0 1.0 2d0 0d0 1.5d0))
+  (assert-f12-equal
+   (f1-2-parallel-coaxial-disk->ring 1d0 2d0 3d0 4d0)
+   (f1-2-parallel-coaxial-rings 0d0 1d0 2d0 3d0 4d0)))
 
 (define-test f1-2-parallel-coaxial-rings-S&H-5.8
   ;; Example 5-8 of Siegel & Howell for some arbitrary numbers.
