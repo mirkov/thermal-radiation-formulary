@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-07 14:06:12EDT rest.lisp>
+;; Time-stamp: <2011-09-21 10:56:27EDT rest.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -96,8 +96,8 @@ Need macro send from my-utils.  Otherwise use (funcall closure args)"
 				     (list 0d0 0d0 (1- eps2) 1d0 0d0)
 				     (list (0- eps1-0) 0d0 0d0 (0- eps1-2) (+ eps1-0 eps1-2))))
     (make-marray 'double-float :dimensions dim
-			       :initial-contents (list (st4 T0 eps0) 0d0 0d0
-						       (st4 T2 eps2) q1)))
+			       :initial-contents (list (sigma*T^4 T0 eps0) 0d0 0d0
+						       (sigma*T^4 T2 eps2) q1)))
    (:temp (expt (/ (maref x 4)
 		   +sigma+)
 		0.25))))
@@ -123,9 +123,9 @@ Need macro send from my-utils.  Otherwise use (funcall closure args)"
 				(list 0d0 0d0 (1- eps2) 1d0 0d0)
 				(list eps1-0 0d0 0d0 eps1-2 1d0)))
     (make-marray 'double-float :dimensions dim
-			       :initial-contents (list (st4 T0 eps0) 0d0 0d0
-						       (st4 T2 eps2)
-						       (st4 T1 (+ eps1-0 eps1-2)))))
+			       :initial-contents (list (sigma*T^4 T0 eps0) 0d0 0d0
+						       (sigma*T^4 T2 eps2)
+						       (sigma*T^4 T1 (+ eps1-0 eps1-2)))))
    (:q1 (maref x 4))))
 
 	     

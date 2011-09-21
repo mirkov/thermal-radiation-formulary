@@ -14,8 +14,11 @@
 	    :depends-on ("setup")
 	    :pathname #P"./"
 	    :components
-	    ((:file "view-factors")))
-   (:module "view-radiation"
+	    ((:file "view-factors")
+	     (:file "disk+ring-view-factors")
+	     (:file "rectangular-area-view-factors")
+	     (:file "inner-cylinder-surfaces-view-factors")))
+   (:module "spectral-calculations"
 	    :depends-on ("setup")
 	    :pathname #P"./"
 	    :components

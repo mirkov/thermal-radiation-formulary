@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-08 18:02:50EDT inner-cylinder-surfaces-view-factors.lisp>
+;; Time-stamp: <2011-09-21 11:26:38EDT inner-cylinder-surfaces-view-factors.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -40,9 +40,12 @@
 From the configuration factor library, C-78
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-78.html"
-  (let ((H (/ |h| (* 2d0 |r|))))
-    (- (+ 1d0 H)
-       (sqrt (+ 1d0 (^2 H))))))
+  (let* ((H (/ |h| (* 2d0 |r|)))
+	 (A (* 2 pi |r| |h|)))
+    (values
+     (- (+ 1d0 H)
+       (sqrt (+ 1d0 (^2 H))))
+     A A)))
 
 (define-test f1-2-inside-cylinder-surface-to-itself
   (let ((r 1d0)
@@ -59,8 +62,12 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-78.html"
 From the configuration factor library, C-79
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-79.html"
-  (let ((H (/ |h| (* 2d0 |r|))))
-    (* 2d0 H (- (sqrt (+ 1d0 (^2 H))) H))))
+  (let* ((H (/ |h| (* 2d0 |r|)))
+	 (A-base (* pi (^2 |r|)))
+	 (A-inside-surface (* 2 pi |r| |h|)))
+    (values
+     (* 2d0 H (- (sqrt (+ 1d0 (^2 H))) H))
+      A-base A-inside-surface)))
 
 (lisp-unit:define-test f1-2-base-of-right-cylinder-to-inside-surface
   (lisp-unit:assert-number-equal (* 2d0 1d0 (- (sqrt 2d0) 1d0))
@@ -74,14 +81,18 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-79.html"
 From the configuration factor library, C-80
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-80.html"
-  (let ((R (/ |r2| |r1|))
-	(H (/ |h| |r1|)))
+  (let* ((R (/ |r2| |r1|))
+	 (H (/ |h| |r1|))
+	 (A-disk (* pi (^2 |r1|)))
+	 (A-cylinder (* 2d0 pi |r2| |h|)))
     (assert (<= |r1| |r2|))
-    (let ((H^2 (^2 H))
-	  (R^2 (^2 R)))
-      (* 0.5d0 (+ (- 1d0 R^2 H^2)
-		  (sqrt (print (- (^2 (+ 1d0 R^2 H^2))
-				  (* 4d0 R^2)))))))))
+    (values
+     (let ((H^2 (^2 H))
+	   (R^2 (^2 R)))
+       (* 0.5d0 (+ (- 1d0 R^2 H^2)
+		   (sqrt (print (- (^2 (+ 1d0 R^2 H^2))
+				   (* 4d0 R^2)))))))
+     A-disk A-cylinder)))
 
 (define-test f1-2-disk-in-cylinder-base-to-inside-surface
   ;; I compare C-80 against C79
@@ -98,14 +109,18 @@ from the disk.  The disk is `h1' high.
 From the configuration factor library, C-81
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-81.html"
-  (let ((H1 (/ |h1| |r|))
-	(H2 (/ |h2| |r|)))
-    (* 0.25d0
-       (- (* (+ 1d0 (/ H2 H1))
-	     (sqrt (+ 4d0 (^2 (+ H1 H2)))))
-	  (+ H1 (* 2d0 H2))
-	  (* (/ H2 H1)
-	     (sqrt (+ 4d0 (^2 H2))))))))
+  (let* ((H1 (/ |h1| |r|))
+	 (H2 (/ |h2| |r|))
+	 (A-disk (* pi (^2 |r|)))
+	 (A-cylinder (* 2d0 pi |r| |h2|)))
+    (values
+     (* 0.25d0
+	(- (* (+ 1d0 (/ H2 H1))
+	      (sqrt (+ 4d0 (^2 (+ H1 H2)))))
+	   (+ H1 (* 2d0 H2))
+	   (* (/ H2 H1)
+	      (sqrt (+ 4d0 (^2 H2))))))
+     A-cylinder A-disk)))
 
 (define-test f1-2-inner-surface-of-upper-cylinder-to-same-diameter-base-ring
   ;; Test if for unity h1, h2, using the simplified result on the web page

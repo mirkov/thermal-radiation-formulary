@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-08-26 10:11:32EDT utilities.lisp>
+;; Time-stamp: <2011-09-21 11:17:52EDT utilities.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -19,30 +19,47 @@
 
 (in-package :radiation)
 
-(export '(+kb+ +sigma+ ^4 ^0.25 -^4 C->K K->C st4))
+(export '(+kb+ +sigma+ ^4 ^0.25 -^4 C->K K->C sigma*T^4))
 (define-symbol-macro +kb+ physics-constants:+boltzmann-constant-SP+)
 (define-symbol-macro +sigma+ physics-constants:+stefan-boltzmann-constant-SP+)
 
-(defmacro ^4 (arg)
-  `(expt ,arg 4))
+(defun ^4 (arg)
+  (expt arg 4))
 
-(defmacro ^0.25 (arg)
-  `(expt ,arg 0.25))
+(defun ^0.25 (arg)
+  (expt arg 0.25))
+
+(defmacro +^2 (&rest args)
+  "arg1^2+arg2^2+..."
+  `(+ ,@(mapcar #'(lambda (arg)
+		    `(expt ,arg 2))
+		args)))
+
+(defmacro -^2 (&rest args)
+  "arg1^2-arg2^2-..."
+  `(- ,@(mapcar #'(lambda (arg)
+		    `(expt ,arg 2))
+		args)))
 
 (defun -^4 (arg1 arg2)
+  " arg1^4-arg2^4"
   (- (expt arg1 4)
      (expt arg2 4)))
 
-(defmacro C->K (arg)
-  `(+ ,arg 273.15))
+(defun C->K (arg)
+  (+ arg 273.15))
 
 (defmacro K->C (arg)
-  `(- ,arg 273.15))
+  (- arg 273.15))
 
 
-(defmacro st4 (Temp &optional rel-sigma)
+(defun sigma*T^4 (Temp &optional (rel-sigma 1d0))
   "Shorthand for (* sigma rel-sigma T^4).
 If rel-sigma is not provided, it is assumed to be unity"
-  (if rel-sigma
-      `(* +sigma+ (expt ,Temp 4) ,rel-sigma)
-      `(* +sigma+ (expt ,Temp 4))))
+      (* +sigma+ (^4 Temp) rel-sigma))
+
+(defun st4 (Temp &optional (rel-sigma 1d0))
+  "Obsolete function, renamed as `sigma*T^4'"
+  (declare (ignore Temp rel-sigma))
+  (error "function st4 in the ~a package has been renamed into sigma*T^4"
+	 (package-name *package*)))

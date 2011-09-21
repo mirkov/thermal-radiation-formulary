@@ -15,8 +15,8 @@
 	(T1 400)
 	Tp)
     (setf Tp (parallel-plate-equilibrium T0 T1))
-    (assert-number-equal (- (st4 T1) (st4 Tp))
-		     (- (st4 Tp) (st4 T0)))))
+    (assert-number-equal (- (sigma*T^4 T1) (sigma*T^4 Tp))
+		     (- (sigma*T^4 Tp) (sigma*T^4 T0)))))
 
 ;; same as above, but for a problem emissivities that are not unity
 (define-test parallel-plate-equilibrium-sigma#1
@@ -25,8 +25,8 @@
 	 (beta0 0.5)
 	 (beta1 0.2)
 	 (Tp (parallel-plate-equilibrium T0 T1 beta0 beta1)))
-    (assert-number-equal (* beta1 (- (st4 T1) (st4 Tp)))
-		     (* beta0 (- (st4 Tp) (st4 T0))))))
+    (assert-number-equal (* beta1 (- (sigma*T^4 T1) (sigma*T^4 Tp)))
+		     (* beta0 (- (sigma*T^4 Tp) (sigma*T^4 T0))))))
 		   
 
 ;;;; Three parallel plates test.  The numerical values are results of

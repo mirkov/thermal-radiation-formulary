@@ -1,4 +1,25 @@
-2011-09-08  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+2011-09-21  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
+
+	* thermal-radiation-formulary.asd (thermal-radiation-formulary):
+	Renamed view-radiation module into spectral-calculations
+
+	* disk+ring-view-factors.lisp (f1-2-parallel-coaxial-equal-disks)
+	(f1-2-parallel-coaxial-unequal-disks)
+	(f1-2-parallel-coaxial-disk&ring, f1-2-parallel-coaxial-rings):
+	Changed arguments to those of the radiation catalogue.  Added
+	formulas for areas, and modified return values to return them
+
+	* thermal-radiation-formulary.asd (thermal-radiation-formulary):
+	Modified to load rectangular and inner cylinder surfaces view
+	factors
+
+	* rectangular-area-view-factors.lisp: Modified all functions to
+	return areas
+
+	* utilities.lisp: Replaced many of the macro definitions as
+	functions: ^0.25 ^4 C->K K->C st4.
+	(sigma*T^4): Renamed st4 into sigma*T^4.  Replaced its invocations
+	at other places in the code.
 
 2011-09-07  Mirko Vukovic  <Mirko Vukovic <mirko.vukovic@us.tel.com>>
 
