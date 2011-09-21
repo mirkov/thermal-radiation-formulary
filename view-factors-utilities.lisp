@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-21 10:47:50EDT view-factors-utilities.lisp>
+;; Time-stamp: <2011-09-21 14:49:29EDT view-factors-utilities.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -25,3 +25,7 @@
   `(multiple-value-bind (,f12 ,@(if a1 `(,a1 ,@(if a2 `(,a2)))))
 			 ,@body))
 
+(defmacro assert-f12-equal (form1 form2)
+  `(assert-number-equal
+    (f12-bind (f12-1) ,form1 f12-1)
+    (f12-bind (f12-2) ,form2 f12-2)))

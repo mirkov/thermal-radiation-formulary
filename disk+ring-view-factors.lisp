@@ -1,5 +1,5 @@
 ;; Mirko Vukovic
-;; Time-stamp: <2011-09-21 11:23:23EDT disk+ring-view-factors.lisp>
+;; Time-stamp: <2011-09-21 14:47:52EDT disk+ring-view-factors.lisp>
 ;; 
 ;; Copyright 2011 Mirko Vukovic
 ;; Distributed under the terms of the GNU General Public License
@@ -34,14 +34,14 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-40.html"
 	    A1 A2)))
 
 
-(defun f1-2-parallel-coaxial-unequal-disks (|r1| |r2| sep)
-  "Parallel coaxial disks of radius `r-disk' and separation `sep'
+(defun f1-2-parallel-coaxial-unequal-disks (|r1| |a| |r2|)
+  "Parallel coaxial disks of radius `r-disk' and separation `|a|'
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-41.html"
   (labels ((r-norm (r h)
 	     (/ r h)))
-    (let* ((R1^2 (^2 (r-norm |r1| sep)))
-	   (R2^2 (^2 (r-norm |r2| sep)))
+    (let* ((R1^2 (^2 (r-norm |r1| |a|)))
+	   (R2^2 (^2 (r-norm |r2| |a|)))
 	   (x (+ 1d0 (/ (+ 1d0 R2^2)
 			R1^2)))
 	 
@@ -52,12 +52,18 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-41.html"
 			       (* 4d0 (/ R2^2 R1^2))))))
 	      A1 A2))))
 
-(defun f1-2-parallel-coaxial-disk&ring (|r1| |a| |r2| |r3|)
-  "View factor from ring of radii `|r2|' and `|r3|' to parallel
-  coaxial disk of radius `|r1|'.  The separation between the two is
-  `|a|'
+(define-test coaxial-disks
+  ;; test the unequal disks by comparing with equal disks
+  (assert-f12-equal
+     (f1-2-parallel-coaxial-equal-disks 1d0 1.5d0)
+     (f1-2-parallel-coaxial-unequal-disks 1d0 1.5d0 1d0)))
+
+(defun f1-2-parallel-coaxial-disk->ring (|r1| |a| |r2| |r3|)
+  "View factor from disk of radius `|r1|' to parallel coaxial ring of
+radii `|r2|' and `|r3|'.  The separation between the two is `|a|'
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-47.html"
+  (assert (<= |r2| |r3|))
   (labels ((f (r^2 h^2)
 	     (- r^2
 		(sqrt (- (^2 (+ 1d0 r^2 h^2))
@@ -72,6 +78,20 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-47.html"
 		 (f r2^2 h^2)))
 	   A1 A2))))
 
+(define-test f1-2-parallel-coaxial-disk->ring
+  ;; test by making the ring inner radius 0d0, and comparing with disk
+  ;; of same outer radius
+  (assert-f12-equal
+   (f1-2-parallel-coaxial-equal-disks 1.5d0 2d0)
+   (f1-2-parallel-coaxial-disk&ring 1.5d0 2d0 0d0 1.5d0))
+  ;; test by using configuration alebra: disk-to-disk vs
+  ;; disk-to-smaller-disk + disk-to-remaining-ring
+  (assert-f12-equal
+   (f1-2-parallel-coaxial-unequal-disks 1.5d0 3d0 2d0)
+   (+ (f1-2-parallel-coaxial-unequal-disks 1.5d0 3d0 1.75d0)
+      (f1-2-parallel-coaxial-disk->ring 1.5d0 3d0 1.75d0 2d0))))
+
+
 (defun f1-2-parallel-coaxial-rings (|r1| |r2| |a|
 					      |r3| |r4|)
   "View factor from ring of radii `r-inner' and `r-outer' to parallel
@@ -79,6 +99,8 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-47.html"
   `|a|'
 
 http://www.engr.uky.edu/rtl/Catalog/sectionc/C-52.html"
+  (assert (<= |r1| |r2|))
+  (assert (<= |r3| |r4|))
   (labels ((f (ra^2 rb^2 h^2)
 	     (sqrt (- (^2 (+ ra^2 rb^2 h^2))
 		      (* 4d0 ra^2 rb^2)))))
@@ -95,3 +117,37 @@ http://www.engr.uky.edu/rtl/Catalog/sectionc/C-52.html"
 	     (- (f r2^2 r4^2 h^2)
 		(f 1d0 r4^2 h^2))))
        A1 A2))))
+
+(define-test f1-2-parallel-coaxial-rings
+  ;; I test against disk-disk and disk-ring form factors
+  (let ((lisp-unit:*epsilon* 1e-9))
+    (assert-f12-equal
+     (f1-2-parallel-coaxial-equal-disks 1d0 1.5d0)
+     (f1-2-parallel-coaxial-rings 1d-9 1d0 1.5d0 0d0 1.d0))
+    (assert-f12-equal
+     (f1-2-parallel-coaxial-unequal-disks 1.0 2d0 1.5d0)
+     (f1-2-parallel-coaxial-rings 1d-9 1.0 2d0 0d0 1.5d0))
+    (assert-f12-equal
+     (f1-2-parallel-coaxial-disk->ring 1d0 2d0 3d0 4d0)
+     (f1-2-parallel-coaxial-rings 1d-9 1d0 2d0 3d0 4d0))))
+
+(define-test f1-2-parallel-coaxial-rings-S&H-5.8
+  ;; Example 5-8 of Siegel & Howell for some arbitrary numbers.
+  ;; Despite all the numbers double precision, the accuracy is about
+  ;; 1e-14
+  (let ((r1 1d0)
+	(r2 1.28d0)
+	(r4 0.72d0)
+	(r3 0.92d0)
+	(a 0.38d0))
+    (let ((a1 (* pi (^2 r1)))
+	  (a2 (* pi (-^2 r2 r1)))
+	  (lisp-unit:*epsilon* 1d-12))
+      (assert-f12-equal
+       (- (* (/ (+ a1 a2) a2)
+	     (- (f1-2-parallel-coaxial-unequal-disks r2 a r3)
+		(f1-2-parallel-coaxial-unequal-disks r2 a r4)))
+	  (* (/ a1 a2)
+	     (- (f1-2-parallel-coaxial-unequal-disks r1 a r3)
+		(f1-2-parallel-coaxial-unequal-disks r1 a r4))))
+       (f1-2-parallel-coaxial-rings r1 r2 a r4 r3)))))
